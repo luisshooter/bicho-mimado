@@ -36,8 +36,8 @@ export function ImageReveal({
   priority = false,
   variant = 'slide-up',
   delay = 0,
-  threshold = 0.1,
-  rootMargin = '0px 0px -10% 0px',
+  threshold = 0.2,
+  rootMargin = '0px 0px -15% 0px',
   once = true,
   children,
 }: ImageRevealProps) {
@@ -49,7 +49,6 @@ export function ImageReveal({
     if (!el) return
 
     let revealed = false
-    let ticking = false
 
     const reveal = () => {
       if (revealed) return
@@ -58,14 +57,12 @@ export function ImageReveal({
       cleanup()
     }
 
+    // Only checked on mount and hashchange (anchor-nav jumps) — not on
+    // every scroll tick, or it would preempt the IntersectionObserver and
+    // reveal images the instant they touch the viewport edge, before
+    // they're actually visible.
     const checkPosition = () => {
-      ticking = false
       if (el.getBoundingClientRect().top < window.innerHeight) reveal()
-    }
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(checkPosition)
     }
 
     const observer = new IntersectionObserver(
@@ -75,13 +72,11 @@ export function ImageReveal({
       { threshold, rootMargin }
     )
     observer.observe(el)
-    window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('hashchange', checkPosition)
     checkPosition()
 
     function cleanup() {
       observer.disconnect()
-      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('hashchange', checkPosition)
     }
 

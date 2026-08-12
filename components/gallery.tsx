@@ -63,8 +63,8 @@ export function Gallery() {
                 sizes="(max-width: 1024px) 45vw, 22vw"
                 variant="zoom"
                 delay={index * 120}
-                threshold={0.1}
-                rootMargin="0px 0px -10% 0px"
+                threshold={0.2}
+                rootMargin="0px 0px -15% 0px"
                 className={`group relative aspect-[4/5] overflow-hidden rounded-3xl border border-cream/10 ${index % 2 === 1 ? 'lg:translate-y-6' : ''}`}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

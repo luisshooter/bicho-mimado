@@ -12,7 +12,7 @@ type RevealProps = {
 }
 
 const VARIANT_CLASSES: Record<NonNullable<RevealProps['variant']>, string> = {
-  up: 'fade-in slide-in-from-bottom-8',
+  up: 'fade-in slide-in-from-bottom-16',
   zoom: 'fade-in zoom-in-90',
 }
 
@@ -30,7 +30,6 @@ export function Reveal({ children, className = '', delay = 0, variant = 'up' }: 
     if (!el) return
 
     let revealed = false
-    let ticking = false
 
     const reveal = () => {
       if (revealed) return
@@ -39,36 +38,30 @@ export function Reveal({ children, className = '', delay = 0, variant = 'up' }: 
       cleanup()
     }
 
-    // Safety net for anchor-nav jumps (href="#section", no smooth scroll)
-    // and fast fling scrolls: the element can go from "below viewport" to
-    // "above viewport" in one step without its intersection ratio ever
-    // crossing the observer's threshold, so IntersectionObserver never
-    // fires at all. A manual position check on scroll/hashchange catches
-    // that case; it stops once IntersectionObserver reveals normally.
+    // Safety net for anchor-nav jumps (href="#section", no smooth scroll):
+    // the element can land already above the viewport without its
+    // intersection ratio ever crossing the observer's threshold, so
+    // IntersectionObserver never fires. Checked once on mount (element
+    // already on screen at load) and on hashchange only — NOT on every
+    // scroll tick, or it would preempt the IntersectionObserver and reveal
+    // cards the instant they touch the viewport edge, well before they're
+    // actually visible, killing the "revealed as you scroll" effect.
     const checkPosition = () => {
-      ticking = false
       if (el.getBoundingClientRect().top < window.innerHeight) reveal()
-    }
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(checkPosition)
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) reveal()
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0.2, rootMargin: '0px 0px -15% 0px' },
     )
     observer.observe(el)
-    window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('hashchange', checkPosition)
     checkPosition()
 
     function cleanup() {
       observer.disconnect()
-      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('hashchange', checkPosition)
     }
 
@@ -81,7 +74,7 @@ export function Reveal({ children, className = '', delay = 0, variant = 'up' }: 
       style={delay ? { animationDelay: `${delay}ms` } : undefined}
       className={`${className} ${
         visible
-          ? `animate-in ${VARIANT_CLASSES[variant]} fill-mode-both duration-700 ease-out`
+          ? `animate-in ${VARIANT_CLASSES[variant]} fill-mode-both duration-900 ease-out`
           : 'opacity-0'
       }`}
     >
