@@ -155,8 +155,8 @@
     animation-duration: 150ms !important;
   }
 
-  .animate-float,
-  .animate-marquee {
-    animation: none !important;
-  }
+  /* Decorative continuous motion (marquee scroll, hero float bob) stays
+     animated even under reduced-motion — an explicit product choice for
+     this site, not the default. Only the one-shot content-reveal
+     animations above are shortened. */
 }
